@@ -1,6 +1,6 @@
 # Build output
-build/
-out/
+/build/
+/out/
 cmake-build-*/
 
 # Tooling
