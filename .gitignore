@@ -1,0 +1,19 @@
+# Build output
+build/
+out/
+cmake-build-*/
+
+# Tooling
+compile_commands.json
+.cache/
+
+# Claude Code (personal settings)
+.claude/settings.local.json
+
+# Editors / OS
+.vs/
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
