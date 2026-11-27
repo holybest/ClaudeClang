@@ -27,6 +27,12 @@
             "type": "command",
             "command": "python \"$CLAUDE_PROJECT_DIR/.claude/hooks/log_conversation.py\" 2>/dev/null || true",
             "timeout": 30
+          },
+          {
+            "type": "command",
+            "command": "python -I \"$CLAUDE_PROJECT_DIR/.claude/hooks/check_lizard.py\"",
+            "timeout": 120,
+            "statusMessage": "Lizard 메트릭 검사 중..."
           }
         ]
       }

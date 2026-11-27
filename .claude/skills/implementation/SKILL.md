@@ -9,6 +9,8 @@ description: A-SPICE(SWE.3 구현) 기준으로 상세 설계를 C/C++ 코드로
 
 ## 함수 규칙
 
+**적용 범위: `src/`, `include/`의 제품 코드.** 테스트 코드(`tests/`)에는 적용하지 않는다 (GoogleTest의 `TEST` 본문과 GMock의 `MOCK_METHOD`는 반환형이 `void`이므로). 테스트 보조 함수는 값을 반환하는 것을 권장한다.
+
 ### 1. 모든 함수는 반환값을 가진다
 - `void` 함수를 만들지 않는다. 반환할 값이 없으면 **정상 실행 여부를 알 수 있는 상태 코드**를 반환한다.
 - 프로젝트 공용 상태 타입을 한 곳(`include/common/status.h` 등)에 정의해 쓴다.
@@ -43,11 +45,13 @@ description: A-SPICE(SWE.3 구현) 기준으로 상세 설계를 C/C++ 코드로
 ## 구현 절차
 
 1. 설계 문서의 모듈(`DD-nnn`)을 하나 고르고, 인터페이스(`IF-nnn`)가 있으면 그 헤더를 먼저 작성한다.
-2. 공개 헤더에는 인터페이스에 있는 것만 둔다. 내부 함수·상태는 `static`/익명 네임스페이스로 숨긴다.
-3. 각 함수 위에 Doxygen 주석(`@brief`, `@param`, `@return`)과 구현하는 설계 ID(`@design DD-nnn`)를 적는다.
-4. 구현 후 `/build`로 빌드하고 `/lint`로 포맷·정적 분석을 통과시킨다.
-5. `links.csv`에 `DD-nnn,SRC-<파일 경로>[:<함수>]` 링크를 추가한다. (예: `DD-004,SRC-src/buffer/buffer.cpp:write`)
-6. 단위 테스트는 `/unit-test`로 이어서 작성한다.
+2. **TDD로 구현한다.** `test-driven-development` 스킬에 따라 실패하는 테스트를 `tests/tdd/`에 먼저 쓰고(`cc_add_test(tdd <이름> SOURCES ... LINK ...)`, 라벨 `tdd`), 통과하는 최소 구현을 쓰고, 리팩터링한다. TDD 테스트는 단위 테스트와 폴더·라벨·결과·커버리지를 모두 분리한다. 공식 단위 테스트(MC/DC·분기 100 %)는 `/unit-test`에서 `tests/unit/`에 따로 만든다.
+3. 공개 헤더에는 인터페이스에 있는 것만 둔다. 내부 함수·상태는 `static`/익명 네임스페이스로 숨긴다.
+4. **모든 소스·헤더 파일 맨 위에 `@file` Doxygen 블록과 Human-in-the-Loop 항목**(`@par AI 작성 이력`: 모델·일시·요청자, `@par 사용자 리뷰`: 상태·일시·리뷰어)을 넣는다. 형식은 CLAUDE.md 2.4절. 모델은 실제로 작성하는 모델의 이름과 ID, 일시는 오늘, 요청자는 `git config user.name`이다. **`사용자 리뷰`는 `미완료`로 두고, AI가 스스로 `완료`로 바꾸지 않는다.** 이미 있는 파일을 고치면 `AI 작성 이력`에 항목을 추가하고 리뷰 상태를 `미완료`로 되돌린다.
+5. 각 함수 위에 Doxygen 주석(`@brief`, `@param`, `@return`)과 구현하는 설계 ID(`@design DD-nnn`)를 적는다. 주석률 20 % 이상이 CI 기준이므로 설계 의도를 충분히 적는다.
+6. 구현 후 `/build`로 빌드하고 `/lint`로 포맷, 정적 분석, 메트릭(Cppcheck 0건, Lizard CCN ≤ 10·함수 라인 ≤ 80, 주석률, HITL 주석)을 통과시킨다. Stop 훅(`check_lizard.py`)도 응답 종료 때 같은 메트릭을 검사한다.
+7. `links.csv`에 `DD-nnn,SRC-<파일 경로>[:<함수>]` 링크를 추가한다. (예: `DD-004,SRC-src/buffer/buffer.cpp:write`)
+8. 단위 테스트는 `/unit-test`로 이어서 작성한다.
 
 ## 규칙 점검 (완료 전)
 
@@ -60,7 +64,7 @@ rg -c '\breturn\b' src                          # 함수당 return 개수는 파
 
 ## 완료 조건
 
-1. 빌드가 경고 없이 통과하고 `/lint`가 깨끗하다.
+1. 빌드가 경고 없이 통과하고 `/lint`(clang-format, clang-tidy, Cppcheck 0건, Lizard, 주석률 20 % 이상, HITL 주석)가 깨끗하다. TDD 테스트가 `tests/tdd/`에 있고 통과한다.
 2. 모든 함수가 반환값을 가지고 마지막에 한 번만 return한다.
 3. 소스가 설계의 모듈·인터페이스와 일치하고 `links.csv`에 `DD → SRC`가 있다.
 4. `/review code`로 리뷰하고 결과를 `docs/reviews/`에 남긴다.

@@ -1,6 +1,6 @@
 ---
 name: review
-description: A-SPICE 요건에 따라 산출물별 체크리스트로 요구사항, 아키텍처, 상세 설계, 코드, 단위 테스트, 통합 테스트를 리뷰한다. 모든 산출물은 완료 전에 이 스킬로 리뷰해야 한다. "리뷰", "검토", "review" 요청 시 사용한다. 인자로 산출물 종류를 받는다 (requirements | architecture | detailed-design | code | unit-test | integration-test).
+description: A-SPICE 요건에 따라 산출물별 체크리스트로 요구사항, 아키텍처, 상세 설계, 코드, 단위 테스트, 통합 테스트, 시스템 테스트를 리뷰한다. 모든 산출물은 완료 전에 이 스킬로 리뷰해야 한다. "리뷰", "검토", "review" 요청 시 사용한다. 인자로 산출물 종류를 받는다 (requirements | architecture | detailed-design | code | unit-test | integration-test | system-test).
 ---
 
 # 산출물 리뷰
@@ -19,6 +19,7 @@ description: A-SPICE 요건에 따라 산출물별 체크리스트로 요구사�
    | 코드 | `checklists/code.md` | SWE.3 |
    | 단위 테스트 | `checklists/unit-test.md` | SWE.4 |
    | 통합 테스트 | `checklists/integration-test.md` | SWE.5 |
+   | 시스템 테스트 | `checklists/system-test.md` | SWE.6 |
 
    종류가 불분명하면 사용자에게 묻는다. 여러 산출물이면 각각 따로 리뷰한다.
 2. **상위/하위 산출물 읽기**: 일관성과 추적성 항목을 판단하려면 상위 산출물(예: 설계 리뷰라면 요구사항·아키텍처)과 `docs/traceability/links.csv`가 필요하다. 읽지 않은 문서에 대해 판정하지 않는다.
@@ -38,7 +39,7 @@ description: A-SPICE 요건에 따라 산출물별 체크리스트로 요구사�
 
 ## 리뷰 원칙
 
-- **독립성**: 산출물을 작성한 같은 흐름에서 자기 결과를 승인하지 않는다. `reviewer` 서브에이전트(`.claude/agents/reviewer.md`)에게 산출물 경로와 종류만 넘겨 독립적으로 판정하게 한다. 코드는 `cpp-reviewer`를 병행해도 된다. 작성자의 결론이나 "문제없다"는 의견은 전달하지 않는다.
+- **독립성**: 산출물을 작성한 같은 흐름에서 자기 결과를 승인하지 않는다. 메인 에이전트가 이 스킬을 쓸 때는 `reviewer` 서브에이전트(`.claude/agents/reviewer.md`)에게 산출물 경로와 종류만 넘겨 독립적으로 판정하게 한다. **이미 `reviewer` 서브에이전트로 실행 중이라면 다시 위임하지 말고 이 절차를 직접 수행한다.** 코드는 `cpp-reviewer`를 병행해도 된다. 작성자의 결론이나 "문제없다"는 의견은 전달하지 않는다.
 - **체크리스트를 통과시키기 위해 산출물이 아니라 체크리스트를 바꾸지 않는다.** 체크리스트 개선은 별도 변경으로 하고 사유를 남긴다.
 - **재리뷰**: Fail을 수정한 뒤에는 수정한 항목과 영향받는 항목을 다시 판정한 새 보고서(같은 날이면 `-2`)를 남긴다. 이전 보고서는 지우지 않는다.
 - 보고서에는 실제 확인한 것만 쓴다. 실행하지 않은 검사를 통과했다고 적지 않는다.

@@ -6,11 +6,11 @@ description: A-SPICE(SWE.4 단위 검증) 기준으로 단위 테스트를 설�
 # 단위 테스트 (A-SPICE SWE.4)
 
 입력은 구현된 소스와 상세 설계(`docs/design/`)이다. 테스트는 **설계 명세(기대 동작)에서** 도출하고, 코드를 보고 현재 동작을 그대로 기록하지 않는다.
-테스트는 `tests/unit/`에 두고 CTest에 등록한다. 프레임워크가 없으면 `test-writer` 에이전트 지침대로 사용자에게 GoogleTest 도입을 제안한다.
+테스트는 `tests/unit/`에 두고 `cmake/ClaudeTesting.cmake`의 `cc_add_test(unit <이름> SOURCES ... LINK ...)`로 등록한다(CTest 라벨 `unit`). GoogleTest/GoogleMock은 `claudeclangbuild` 이미지에 설치되어 있다. **구현 단계의 TDD 테스트(`tests/tdd/`)와 섞지 않는다.** TDD 테스트와 별개로, 설계 명세에서 도출한 공식 단위 테스트를 이 단계에서 만든다.
 
 ## 1. 커버리지 목표
 
-- 목표는 CLAUDE.md의 "A-SPICE 개발 프로세스" 절 `커버리지 목표`를 따른다. **목표가 정의되어 있지 않으면 작업 전에 사용자에게 묻는다.** (기본 제안: 라인 100 %, 분기 100 %)
+- 목표는 CLAUDE.md 2.1절을 따른다: 단위 테스트는 **MC/DC 100 %, 분기 100 %, 성공률 100 %**. 측정은 `tests/unit/`(라벨 `unit`) 테스트만으로 하고 TDD 테스트는 합산하지 않는다. 목표가 바뀌었거나 정의되어 있지 않으면 작업 전에 사용자에게 묻는다.
 - MC/DC 목표가 있으면 4절의 MC/DC 절차를 적용한다.
 - 목표를 **100 % 달성할 때까지** 측정 → 미커버 분석 → 케이스 추가를 반복한다. 반복마다 수치를 보고한다.
 - 도달 불가능한 코드가 원인이면 테스트를 억지로 만들지 말고, 방어 코드 제거(설계/구현 수정)나 정당한 제외 사유를 사용자에게 보고하고 승인을 받는다.
@@ -39,11 +39,13 @@ description: A-SPICE(SWE.4 단위 검증) 기준으로 단위 테스트를 설�
 측정은 이 스킬의 스크립트를 쓴다. (LLVM의 clang, llvm-profdata, llvm-cov와 cmake, ninja가 필요하다.)
 
 ```sh
-# 라인·분기 (목표 100 %)
-bash .claude/skills/unit-test/scripts/coverage.sh --line 100 --branch 100
+# 단위 게이트(CLAUDE.md 2.1): MC/DC 100 % + 분기 100 % — clang 18 이상, tests/unit 만 측정
+bash .claude/skills/unit-test/scripts/coverage.sh --label '^unit$' --mcdc --mcdc-target 100 --branch 100
 
-# MC/DC 목표가 있는 경우 (clang 18 이상)
-bash .claude/skills/unit-test/scripts/coverage.sh --mcdc --mcdc-target 100
+# CI 와 같은 판정(라벨별 래퍼, 결과는 build/reports/coverage/unit/ 에 보존)
+bash ci/scripts/coverage.sh unit
+
+# 지정한 항목만 판정한다: --line, --branch, --function, --mcdc-target (지정하지 않은 항목은 측정만)
 ```
 스크립트는 `build-cov/`에 계측 빌드를 만들고, CTest를 실행해 프로파일을 합친 뒤 요약, 목표 대비 결과, 미커버 라인·분기 위치를 출력한다. 목표 미달이면 종료 코드 1이다.
 도구가 없으면 스크립트가 설치 방법을 안내한다. `LLVM_BIN=<경로>`로 LLVM 위치를 지정할 수 있다.

@@ -1,11 +1,12 @@
 #!/usr/bin/env bash
 # LLVM source-based coverage (line / branch / region, optionally MC/DC) for a CMake + Ninja project.
 #
-# Usage: coverage.sh [--mcdc] [--build-dir DIR] [--line PCT] [--branch PCT] [--mcdc-target PCT]
-#                    [--ignore REGEX] [--label REGEX]
+# Usage: coverage.sh [--mcdc] [--build-dir DIR] [--line PCT] [--branch PCT] [--function PCT]
+#                    [--mcdc-target PCT] [--ignore REGEX] [--label REGEX]
 #   --mcdc            instrument for MC/DC (needs clang >= 18) and check MC/DC coverage
 #   --build-dir DIR   coverage build directory (default: build-cov, kept apart from `build/`)
-#   --line/--branch   required percentage (default 100)
+#   --line/--branch/--function   required percentage. A metric is only checked when given;
+#                    with none given the script just measures and reports.
 #   --mcdc-target     required MC/DC percentage when --mcdc is given (default 100)
 #   --ignore REGEX    source files excluded from coverage (default: tests, third-party, build dirs)
 #   --label REGEX     only run tests whose CTest label matches (e.g. "unit")
@@ -14,7 +15,7 @@
 # Exit code: 0 target met, 1 target missed, 2 setup/tool error.
 set -euo pipefail
 
-BUILD=build-cov; MCDC=0; LINE=100; BRANCH=100; MCDC_TARGET=100; LABEL=""
+BUILD=build-cov; MCDC=0; LINE=""; BRANCH=""; FUNCTION=""; MCDC_TARGET=100; LABEL=""
 IGNORE='(^|/)(tests?|test|third_party|_deps|build[^/]*|\.claude)/'
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
@@ -24,10 +25,11 @@ while [ $# -gt 0 ]; do
     --build-dir) BUILD="$2"; shift ;;
     --line) LINE="$2"; shift ;;
     --branch) BRANCH="$2"; shift ;;
+    --function) FUNCTION="$2"; shift ;;
     --mcdc-target) MCDC_TARGET="$2"; shift ;;
     --ignore) IGNORE="$2"; shift ;;
     --label) LABEL="$2"; shift ;;
-    -h|--help) sed -n '2,15p' "$0"; exit 0 ;;
+    -h|--help) sed -n '2,17p' "$0"; exit 0 ;;
     *) echo "unknown option: $1" >&2; exit 2 ;;
   esac
   shift
@@ -109,7 +111,7 @@ show_args=("${common[@]}" -show-branches=count)
 echo "== 목표 대비 =="
 set +e
 "$PY" -I "$HERE/cov_gaps.py" --summary "$COVDIR/summary.json" --lcov "$COVDIR/coverage.lcov" \
-  --line "$LINE" --branch "$BRANCH" $([ "$MCDC" = 1 ] && echo "--mcdc $MCDC_TARGET")
+  ${LINE:+--line "$LINE"} ${BRANCH:+--branch "$BRANCH"} ${FUNCTION:+--function "$FUNCTION"}   $([ "$MCDC" = 1 ] && echo "--mcdc $MCDC_TARGET")
 rc=$?
 set -e
 echo "상세(분기/MC·DC 조건별): $COVDIR/detail.txt"

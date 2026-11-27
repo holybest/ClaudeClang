@@ -1,0 +1,27 @@
+# 필수 플러그인. 버전을 생략하면 이 Jenkins(LTS)와 호환되는 최신 버전이 설치되고, 의존 플러그인도 함께 설치된다.
+# 결과는 플러그인에서 확인한다: 테스트=junit, 정적 분석·메트릭=warnings-ng, 커버리지=coverage
+
+# 파이프라인
+workflow-aggregator
+pipeline-stage-view
+docker-workflow
+timestamper
+ansicolor
+build-timeout
+ws-cleanup
+credentials-binding
+
+# 소스: GitHub 멀티브랜치 (Gitflow의 feature/*, develop, release/*, hotfix/* 를 자동 인식)
+git
+github
+github-branch-source
+cloudbees-folder
+
+# 결과 확인
+junit
+warnings-ng
+coverage
+
+# 코드로 구성 (Configuration as Code + Job DSL)
+configuration-as-code
+job-dsl

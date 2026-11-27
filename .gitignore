@@ -1,6 +1,7 @@
 # Build output
 /build/
 /out/
+/build-cov*/
 cmake-build-*/
 
 # Tooling

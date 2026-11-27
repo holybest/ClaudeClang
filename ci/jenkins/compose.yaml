@@ -1,0 +1,20 @@
+name: claudeclang-ci
+
+services:
+  jenkins:
+    build: .
+    image: claudeclang-jenkins:lts
+    container_name: claudeclang-jenkins
+    user: root
+    ports:
+      - "8080:8080"
+    environment:
+      # 관리자 비밀번호는 up.sh 가 저장소 밖 파일에서 읽어 환경 변수로 넘긴다.
+      JENKINS_ADMIN_PASSWORD: ${JENKINS_ADMIN_PASSWORD:?bash ci/jenkins/up.sh 로 실행하세요}
+    volumes:
+      - jenkins_home:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
+    restart: unless-stopped
+
+volumes:
+  jenkins_home:

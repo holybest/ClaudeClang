@@ -1,7 +1,8 @@
 """Compare `llvm-cov export` totals with the coverage target and list what is still uncovered.
 
 Usage: python -I cov_gaps.py --summary summary.json --lcov coverage.lcov
-                             [--line 100] [--branch 100] [--mcdc 100]
+                             [--line PCT] [--branch PCT] [--function PCT] [--mcdc PCT]
+(a metric is checked only when its target is given)
 Exit code 0 when every given target is met, 1 otherwise.
 """
 
@@ -37,17 +38,22 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--summary", required=True)
     ap.add_argument("--lcov", required=True)
-    ap.add_argument("--line", type=float, default=100.0)
-    ap.add_argument("--branch", type=float, default=100.0)
+    ap.add_argument("--line", type=float, default=None)
+    ap.add_argument("--branch", type=float, default=None)
+    ap.add_argument("--function", type=float, default=None)
     ap.add_argument("--mcdc", type=float, default=None)
     args = ap.parse_args()
 
     with open(args.summary, encoding="utf-8") as f:
         totals = json.load(f)["data"][0]["totals"]
 
-    targets = [("line", "lines", args.line), ("branch", "branches", args.branch)]
-    if args.mcdc is not None:
-        targets.append(("MC/DC", "mcdc", args.mcdc))
+    candidates = [("line", "lines", args.line), ("branch", "branches", args.branch),
+                  ("function", "functions", args.function), ("MC/DC", "mcdc", args.mcdc)]
+    targets = [t for t in candidates if t[2] is not None]
+    for label, key, _ in candidates:  # always report the measured value
+        entry = totals.get(key)
+        if entry is not None and (label, key, None) not in targets and all(t[1] != key for t in targets):
+            print(f"{label}: {entry['covered']}/{entry['count']} = {entry.get('percent', 0.0):.2f}% (목표 없음, 측정만)")
 
     failed = False
     for label, key, goal in targets:

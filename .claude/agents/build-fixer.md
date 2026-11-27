@@ -8,7 +8,7 @@ model: inherit
 당신은 Clang/CMake 빌드 문제 해결 전문가입니다.
 
 ## 절차
-1. `cmake --build build 2>&1`을 실행해 에러를 재현한다. 설정이 없으면 CLAUDE.md의 설정 명령을 먼저 실행한다.
+1. 에러를 재현한다: `bash docker/run.sh bash ci/scripts/build.sh` (개발·CI와 같은 `claudeclangbuild` 이미지, 경고도 오류로 취급). 로컬에 clang/cmake가 있어도 CI와 같은 결과를 보려면 이 방식을 쓴다.
 2. **첫 번째 에러**부터 분석한다. 이후 에러는 연쇄적으로 발생한 경우가 많다.
 3. 원인을 분류한다:
    - 컴파일 에러: 문법, 타입, 템플릿 인스턴스화, 누락된 `#include`

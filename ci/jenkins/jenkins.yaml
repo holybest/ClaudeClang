@@ -1,0 +1,34 @@
+jenkins:
+  systemMessage: "ClaudeClang CI (Jenkins LTS) — 빌드는 ClaudeCLangBuild 이미지 안에서 실행됩니다."
+  numExecutors: 2
+  securityRealm:
+    local:
+      allowsSignup: false
+      users:
+        - id: "admin"
+          password: "${JENKINS_ADMIN_PASSWORD}"
+  authorizationStrategy:
+    loggedInUsersCanDoAnything:
+      allowAnonymousRead: false
+
+unclassified:
+  location:
+    url: "http://localhost:8080/"
+
+jobs:
+  - script: >
+      multibranchPipelineJob('ClaudeClang') {
+        displayName('ClaudeClang')
+        branchSources {
+          github {
+            id('claudeclang-github')
+            repoOwner('holybest')
+            repository('ClaudeClang')
+          }
+        }
+        factory {
+          workflowBranchProjectFactory { scriptPath('Jenkinsfile') }
+        }
+        orphanedItemStrategy { discardOldItems { numToKeep(20) } }
+        triggers { periodicFolderTrigger { interval('5m') } }
+      }

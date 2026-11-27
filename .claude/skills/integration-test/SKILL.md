@@ -5,7 +5,7 @@ description: A-SPICE(SWE.5 통합 검증) 기준으로 컴포넌트 간 인터�
 
 # 통합 테스트 (A-SPICE SWE.5)
 
-입력은 아키텍처(`docs/architecture/`)와 구현된 컴포넌트이다. 테스트는 `tests/integration/`에 두고 CTest에 `integration` 라벨로 등록한다.
+입력은 아키텍처(`docs/architecture/`)와 구현된 컴포넌트이다. 테스트는 `tests/integration/`에 두고 `cc_add_test(integration <이름> SOURCES ... LINK ...)`로 등록한다(CTest 라벨 `integration`).
 단위 테스트(`/unit-test`)가 끝난 모듈을 대상으로 한다.
 
 ## 1. 범위: 인터페이스 중심
@@ -23,9 +23,8 @@ description: A-SPICE(SWE.5 통합 검증) 기준으로 컴포넌트 간 인터�
 
 ## 2. 커버리지 목표
 
-- 목표는 CLAUDE.md의 "A-SPICE 개발 프로세스" 절 `커버리지 목표`를 따른다. **통합 시험 목표가 정의되어 있지 않으면 사용자에게 묻는다.** (기본 제안: 모든 `IF`의 모든 함수·상태 코드·정의된 호출 순서를 100 % 다룬다. 인터페이스 커버리지)
-- 인터페이스 커버리지는 `docs/design`·`docs/architecture`의 인터페이스 표와 테스트의 `@trace`를 대조해 만든 표(`IF` × 함수 × 상태 코드 × 테스트 ID)로 확인한다. 빈 칸이 없어야 한다.
-- 코드 커버리지 목표도 정해져 있으면 `bash .claude/skills/unit-test/scripts/coverage.sh --label integration`으로 측정한다. (MC/DC 등 옵션은 unit-test 스킬 참조)
+- 목표는 CLAUDE.md 2.1절을 따른다: 통합 테스트는 **함수 커버리지 100 %, 성공률 100 %**. 측정은 `bash ci/scripts/coverage.sh integration`(= `coverage.sh --label '^integration$' --function 100`)으로 하고, 목표가 바뀌었거나 정의되어 있지 않으면 사용자에게 묻는다.
+- **설계 점검용으로 인터페이스 커버리지 표도 만든다**(CI 게이트는 아니다). 인터페이스 커버리지는 `docs/design`·`docs/architecture`의 인터페이스 표와 테스트의 `@trace`를 대조해 만든 표(`IF` × 함수 × 상태 코드 × 테스트 ID)로 확인한다. 빈 칸이 없어야 한다.
 - 목표를 **100 % 달성할 때까지** 측정 → 미커버 분석 → 케이스 추가를 반복하고, 반복마다 수치를 보고한다.
 
 ## 3. 테스트 케이스 설계
@@ -45,10 +44,10 @@ description: A-SPICE(SWE.5 통합 검증) 기준으로 컴포넌트 간 인터�
 
 ## 5. 절차 요약
 
-1. 인터페이스 목록(`IF`)과 인터페이스 커버리지 표 작성, 커버리지 목표 확인
+1. 인터페이스 목록(`IF`)과 인터페이스 커버리지 표 작성, 커버리지 목표(함수 100 %) 확인
 2. 인터페이스별 케이스 설계 (동치 클래스 → 경계값 → PICT)
 3. 테스트 작성 + Doxygen 주석 → `/build`, `/test`
-4. 인터페이스 커버리지 표(와 코드 커버리지) 확인 → 미달 항목 분석 → 케이스 추가 → 목표 달성까지 반복
+4. 함수 커버리지(게이트)와 인터페이스 커버리지 표(설계 점검) 확인 → 미달 항목 분석 → 케이스 추가 → 목표 달성까지 반복
 5. `links.csv`에 `IF-nnn,IT-nnn` (필요하면 `ARC-nnn,IT-nnn`, `SWR-…,IT-nnn`) 링크 추가
 6. `python -I .claude/skills/requirements-analysis/scripts/check_traceability.py --until test`
 7. `/review integration-test`로 리뷰하고 결과를 `docs/reviews/`에 남긴다.
