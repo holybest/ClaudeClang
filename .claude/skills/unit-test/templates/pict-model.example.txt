@@ -1,0 +1,13 @@
+# PICT 모델 예시: 파라미터: 값, 값, ...
+# 동치 클래스 대표값 + 경계값을 파라미터 값으로 나열한다.
+# 실행: pict pict-model.example.txt /o:3 > cases.tsv   (/o:N = N-way 조합, 기본 2)
+#
+# 대상: Status Buffer::write(const uint8_t* data, size_t len)
+DataPtr:  null, valid
+Length:   0, 1, 63, 64, 65        # 용량 64 기준 경계값 (0, 1, cap-1, cap, cap+1)
+Mode:     blocking, nonblocking
+State:    empty, half, full
+
+# 불가능한 조합은 제약으로 제외한다 (제외 사유를 주석으로 남긴다)
+IF [DataPtr] = "null" THEN [Length] = 0;                 # null이면 길이 0만 의미 있음
+IF [State] = "full" THEN [Length] <> 0;
