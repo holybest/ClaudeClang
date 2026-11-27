@@ -54,7 +54,7 @@ A-SPICE(SWE.1~SWE.5)를 기준으로 개발하며, 단계마다 전용 스킬을
 | 통합 테스트 | `/integration-test` | `tests/integration/` |
 | 리뷰 | `/review` | `docs/reviews/` |
 
-- **단계 게이트**: 각 단계(분석, 설계, 구현, 테스트)가 끝나면 `aspice-reviewer` 서브에이전트로 리뷰한다. 승인(Fail·미확인 0건)되기 전에는 다음 단계를 시작하지 않는다. 반려되면 모든 부적합(Minor 포함)을 조치하고 재리뷰한다.
+- **단계 게이트**: 각 단계(분석, 설계, 구현, 테스트)가 끝나면 `reviewer` 서브에이전트로 리뷰한다. 승인(Fail·미확인 0건)되기 전에는 다음 단계를 시작하지 않는다. 반려되면 모든 부적합(Minor 포함)을 조치하고 재리뷰한다.
 - ID: `SWR-FUN|QUA|LIM|CON-nnn`(요구사항), `FSR-nnn`(기능 안전), `ARC-nnn`(컴포넌트), `IF-nnn`(인터페이스), `DD-nnn`(모듈), `UT-nnn`/`IT-nnn`(시험)
 - 양방향 추적성: `docs/traceability/links.csv`(`parent_id,child_id`). 검사는 `python -I .claude/skills/requirements-analysis/scripts/check_traceability.py --until <req|arch|design|code|test>`
 - 품질 요구사항 기준: ISO/IEC 25010 (사용하는 판: **미정 — 확인 필요**)
@@ -63,6 +63,6 @@ A-SPICE(SWE.1~SWE.5)를 기준으로 개발하며, 단계마다 전용 스킬을
 
 ## Claude 구성 (`.claude/`)
 - 스킬: `/build`, `/test`, `/lint` 및 위 A-SPICE 스킬 7개 — `.claude/skills/`
-- 서브에이전트: `aspice-reviewer`(단계 게이트 리뷰), `cpp-reviewer`, `build-fixer`, `test-writer` — `.claude/agents/`
+- 서브에이전트: `reviewer`(단계 게이트 리뷰), `cpp-reviewer`, `build-fixer`, `test-writer` — `.claude/agents/`
 - 대화 기록: Stop 훅(`.claude/hooks/log_conversation.py`)이 매 응답 후 `docs/conversation-log.md`에 프롬프트와 답변을 남긴다. 이 파일은 직접 고치지 않는다.
 - 공유 설정: `.claude/settings.json` (개인 설정은 `.claude/settings.local.json`, git 무시)
