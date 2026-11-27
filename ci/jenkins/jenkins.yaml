@@ -30,5 +30,7 @@ jobs:
           workflowBranchProjectFactory { scriptPath('Jenkinsfile') }
         }
         orphanedItemStrategy { discardOldItems { numToKeep(20) } }
-        triggers { periodicFolderTrigger { interval('5m') } }
+        // 익명 GitHub API 한도는 시간당 60회이고 스캔 1회가 여러 번을 쓴다. 5분 주기는 한도를 소진해 스캔이 멈춘다.
+        // 푸시 직후에는 Jenkins 화면의 'Scan Repository Now'로 직접 스캔한다. 자주 돌리려면 GitHub 토큰 자격 증명을 추가한다.
+        triggers { periodicFolderTrigger { interval('1h') } }
       }
